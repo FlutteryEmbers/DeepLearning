@@ -1,2 +1,2 @@
 # DeepLearning
-Contains Models for Deep Learning
+Contains Deep Learning Models
