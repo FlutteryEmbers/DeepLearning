@@ -47,7 +47,7 @@ class CriticNetwork(nn.Module):
 
 class ValueNetwork(nn.Module):
     def __init__(self, beta, input_dims, fc1_dims=256, fc2_dims=256, name='value', chkpt_dir='tmp/sac') -> None:
-        super(ValueNetwork, self).__init__()()
+        super(ValueNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
@@ -85,7 +85,7 @@ class ActorNetwork(nn.Module):
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
-        self.n_actiosn = n_actions
+        self.n_actions = n_actions
         self.name = name
         self.checkpoint_dir = chkpt_dir
         self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_sac')
@@ -103,7 +103,7 @@ class ActorNetwork(nn.Module):
         ## std of the distribution of the policy
         self.sigma =  nn.Linear(self.fc2_dims, self.n_actions)
 
-        self.optimizer = optim.Adm(self.parameters(), lr=alpha)
+        self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
@@ -131,7 +131,7 @@ class ActorNetwork(nn.Module):
         else:
             actions = probabilities.sample()
 
-        action = T.tanh(actions)*T.tensor(self.max_action).to(device)
+        action = T.tanh(actions)*T.tensor(self.max_action).to(self.device)
         log_probs = probabilities.log_prob(actions)
         log_probs -= T.log(1-action.pow(2)+self.reparam_noise)
         log_probs = log_probs.sum(1, keepdim=True)

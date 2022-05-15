@@ -12,7 +12,7 @@ class Agent():
         layer1_size=256, layer2_size=256, batch_size=256, reward_scale=2) -> None:
         self.gamma = gamma
         self.tau = tau
-        self.memory = ReplayBuffer(max_size=max_size, input_dims=input_dims, n_actions=n_actions)
+        self.memory = ReplayBuffer(max_size=max_size, input_shape=input_dims, n_actions=n_actions)
         self.batch_size = batch_size
         self.n_actions = n_actions
 
@@ -27,7 +27,7 @@ class Agent():
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
-        state = T.tensor([observation]).to(self.actor.device)
+        state = T.tensor([observation], dtype=T.float).to(self.actor.device)
         actions, _ = self.actor.sample_normal(state, reparameterize=False)
 
         return actions.cpu().detach().numpy()[0]
@@ -75,7 +75,7 @@ class Agent():
         reward = T.tensor(reward, dtype=T.float).to(self.actor.device)
         done = T.tensor(done).to(self.actor.device)
         state_ = T.tensor(new_state, dtype=T.float).to(self.actor.device)
-        state = T.tensor(state, dtype=float).to(self.actor.device)
+        state = T.tensor(state, dtype=T.float).to(self.actor.device)
         action = T.tensor(action, dtype=T.float).to(self.actor.device)
 
         value = self.value(state).view(-1)
@@ -89,7 +89,7 @@ class Agent():
         critic_value = T.min(q1_new_policy, q2_new_policy)
         critic_value = critic_value.view(-1)
 
-        self.value_optimizer.zero_grad()
+        self.value.optimizer.zero_grad()
         value_target = critic_value -log_probs
         value_loss = 0.5 * F.mse_loss(value, value_target)
         value_loss.backward(retain_graph=True)
