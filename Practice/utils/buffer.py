@@ -1,7 +1,7 @@
 import numpy as np
 
 class ReplayBuffer():
-    def __init__(self, max_size, *input_shape, n_actions) -> None:
+    def __init__(self, max_size, input_shape, n_actions) -> None:
         self.memory_size = max_size
         self.mem_count = 0
         self.state_memory = np.zeros((self.memory_size, *input_shape))
@@ -12,7 +12,7 @@ class ReplayBuffer():
         
 
     def sample(self, batch_size):
-        max_mem = min(self.mem_cntr, self.mem_size)
+        max_mem = min(self.mem_count, self.memory_size)
 
         batch = np.random.choice(max_mem, batch_size)
 

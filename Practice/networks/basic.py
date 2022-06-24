@@ -1,7 +1,7 @@
 from turtle import forward
 import torch
 import torch.nn as nn
-import torch.functional as F
+import torch.nn.functional as F
 import torch.optim as optim
 
 class Net(nn.Module):
@@ -16,6 +16,6 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.fc1(F.relu(x))
-        x = self.fc1(F.relu(x))
-        output = self.fc1(F.relu(x))
+        x = self.fc2(F.relu(x))
+        output = self.output(F.relu(x))
         return output

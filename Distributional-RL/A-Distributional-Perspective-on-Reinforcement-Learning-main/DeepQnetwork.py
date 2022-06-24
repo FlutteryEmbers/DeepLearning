@@ -20,8 +20,8 @@ class DeepQnetwork(nn.Module):
     def __init__(self, lr, input_dim, n_actions, N):
         super(DeepQnetwork, self).__init__()
         
-        self.check_dir = check_dir
-        self.path      = os.path.join(check_dir,model_name)
+        self.check_dir = './'
+        self.path      = os.path.join('.','model')
         self.N         = N
         
         self.conv1     = nn.Conv2d(input_dim[0], 32, 8, stride=4)
