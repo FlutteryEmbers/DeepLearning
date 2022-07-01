@@ -10,9 +10,9 @@ LR = 0.01
 BATCH_SIZE = 32
 TARGET_REPLACE_ITER = 1000
 GAMMA = 0.9
-MEM_SIZE = 200
+MEM_SIZE = 2000
 
-class DQN():
+class Agent():
     def __init__(self, env) -> None:
         n_states = env.observation_space.shape[0]
         n_actions = env.action_space.n
