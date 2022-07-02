@@ -11,7 +11,7 @@ class Critic(nn.Module):
         self.fc1 = nn.Linear(*n_inputs, 128)
         self.fc2 = nn.Linear(128, 256)
         self.fc3 = nn.Linear(256, 1)
-        self.optim = optim.Adam(self.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
@@ -29,7 +29,7 @@ class Actor(nn.Module):
         self.fc1 = nn.Linear(*n_inputs, 128)
         self.fc2 = nn.Linear(128, 256)
         self.fc3 = nn.Linear(256, n_actions)
-        self.optim = optim.Adam(self.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
 
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
@@ -38,7 +38,31 @@ class Actor(nn.Module):
         state = state.to(self.device)
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
-        x = F.softmax(F.relu(self.fc2(x)))
+        x = self.fc3(x)
+        x = F.softmax(x, dim=-1)
         pi = T.distributions.Categorical(x)
 
         return pi
+
+class ActorCriticNetwork(nn.Module):
+    def __init__(self, n_inputs, n_actions, lr) -> None:
+        super(ActorCriticNetwork, self).__init__()
+        self.fc1 = nn.Linear(*n_inputs, 2048)
+        self.fc2 = nn.Linear(2048, 1536)
+        self.pi = nn.Linear(1536, n_actions)
+        self.value = nn.Linear(1536, 1)
+
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
+
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
+
+    def forward(self, state):
+        state = state.to(self.device)
+        x = F.relu(self.fc1(state))
+        x = F.relu(self.fc2(x))
+
+        pi = self.pi(x)
+        value = self.value(x)
+
+        return (pi, value)
