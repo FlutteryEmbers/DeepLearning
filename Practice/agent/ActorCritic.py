@@ -1,9 +1,9 @@
 import torch as T
 import numpy as np
 import torch.nn.functional as F
-from networks.AC import Actor
-from networks.AC import Critic
-from networks.AC import ActorCriticNetwork
+from networks.ac_net import Actor
+from networks.ac_net import Critic
+from networks.ac_net import ActorCriticNetwork
 
 # Without Baseline
 class SimpleAgent():
