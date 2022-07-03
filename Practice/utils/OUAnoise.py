@@ -1,4 +1,3 @@
-from curses import noecho
 import numpy as np
 
 class OUActionNoise():
