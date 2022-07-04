@@ -32,13 +32,13 @@ class SimpleAgent():
         _, q = self.actor_critic(state)
         _, next_q = self.actor_critic(next_state)
 
-        td_loss = reward + self.gamma * next_q * (1-int(done)) - q
+        delta = reward + self.gamma * next_q * (1-int(done)) - q
 
-        action_loss = - self.log_pi * td_loss
-        critic_loss = td_loss ** 2
+        actor_loss = - self.log_pi * delta
+        critic_loss = delta ** 2
 
         
-        (action_loss + critic_loss).backward()
+        (actor_loss + critic_loss).backward()
         self.actor_critic.optimizer.step()
 
 # With Baseline Deduction
