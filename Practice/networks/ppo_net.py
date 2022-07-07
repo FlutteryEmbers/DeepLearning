@@ -3,14 +3,14 @@ import torch.nn as nn
 import torch.optim as optim
 
 class Actor(nn.Module):
-    def __init__(self, n_inputs, actions, fc1_dim=256, fc2_dim=256, lr = 1e-3) -> None:
+    def __init__(self, n_inputs, n_actions, fc1_dim=256, fc2_dim=256, lr = 1e-3) -> None:
         super(Actor, self).__init__()
         self.network = nn.Sequential(
             nn.Linear(*n_inputs, fc1_dim),
             nn.ReLU(),
             nn.Linear(fc1_dim, fc2_dim),
             nn.ReLU(),
-            nn.Linear(fc2_dim, actions),
+            nn.Linear(fc2_dim, n_actions),
             nn.Softmax(dim=-1)
         )
 
@@ -36,7 +36,7 @@ class Critic(nn.Module):
             nn.Linear(fc2_dims, 1)
         )
 
-        self.optimizer = optim.Adam(self.parameters, lr=lr)
+        self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
         self.to(self.device)
     

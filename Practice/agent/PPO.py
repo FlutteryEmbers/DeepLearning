@@ -66,7 +66,7 @@ class Agent():
         log_val = action_distribution.log_prob(action)
         state_value = self.critic(state)
 
-        return action.item(), log_val, state_value
+        return action.item(), log_val.item(), state_value.item()
 
     def learn(self):
         for _ in range(self.n_epochs):
@@ -83,25 +83,25 @@ class Agent():
                 advantages[t] = a_t
 
             advantages = T.tensor(advantages).to(self.actor.device)
-            values = T.tensor(values).to(self.actor.device)
+            state_values = T.tensor(state_values).to(self.actor.device)
 
             for batch in batches:
-                states = T.tensor(states[batch], dtype=T.float)
-                old_probs = T.tensor(log_pi, dtype=T.float)
-                actions = T.tensor(actions, dtype=T.float)
+                states = T.tensor(states[batch], dtype=T.float).to(self.actor.device)
+                old_probs = T.tensor(log_pi, dtype=T.float).to(self.actor.device)
+                actions = T.tensor(actions, dtype=T.float).to(self.actor.device)
 
                 dist = self.actor(states)
                 critic_value = self.critic(states)
                 
                 critic_value = T.squeeze(critic_value)
-                dist = T.squeeze(dist)
+                #  dist = T.squeeze(dist)
 
                 new_prob = dist.log_prob(actions)
                 prob_ratio = new_prob.exp()/old_probs.exp()
 
                 weighted_probs = advantages[batch] * prob_ratio
                 weighted_clipped_probs = T.clamp(prob_ratio, 1 - self.policy_clip, 1 + self.policy_clip)*advantages[batch]
-                actor_loss = - T.min(weighted_probs, weighted_clipped_probs)
+                actor_loss = - T.min(weighted_probs, weighted_clipped_probs).mean()
 
                 returns = advantages[batch] + state_values[batch]
                 critic_loss = (returns - critic_value) **2
@@ -117,8 +117,33 @@ class Agent():
 
         self.replay_buffer.clear()
 
-    def run(self, n_games):
-        
+    def run(self, n_games, N = 20):
+        scores = []
+        n_steps = 0
+        for i in range(n_games):
+            score = 0
+            state = self.env.reset()
+            done = False
+            # agent.reset()
+            while not done:
+                # action = agent.choose_action(state)
+                action, prob, val = self.choose_action(state)
+                state_, reward, done, info = self.env.step(action)
+                n_steps += 1
+                score += reward
+                self.env.render()
+                self.store(state=state, action=action, next_state=state_, reward=reward, done=done, state_value=val, log_pi=prob)
+                if n_steps % N == 0:
+                    self.learn()
+                
+                state = state_
+
+            # agent.learn()
+            scores.append(score)
+            avg_score = np.mean(scores[-100:])
+            print('episode', i, 'score %.1f' % score, 'average score %.2f' % avg_score)
+
+        self.env.close()
 
 
 
