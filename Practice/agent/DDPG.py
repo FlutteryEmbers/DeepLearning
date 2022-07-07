@@ -6,11 +6,12 @@ from utils.buffer import ReplayBuffer
 from utils.OUAnoise import OUActionNoise
 
 class Agent():
-    def __init__(self, n_inputs, n_actions, tau = 0.001, gamma = 0.99, buffer_size = int(1e6), batch_size = 64) -> None:
+    def __init__(self, env, n_inputs, n_actions, tau = 0.001, gamma = 0.99, buffer_size = int(1e6), batch_size = 64) -> None:
         self.tau = tau
         self.gamma = gamma
         self.buffer_size = buffer_size
         self.batch_size = batch_size
+        self.env = env
 
         self.actor = Actor(n_inputs=n_inputs, n_actions=n_actions)
         self.actor_target = Actor(n_inputs=n_inputs, n_actions=n_actions)
@@ -98,6 +99,31 @@ class Agent():
 
         self.actor_target.load_state_dict(actor_state_dict)
         self.critic_target.load_state_dict(critic_state_dict)
+
+    def run(self, n_games):
+        scores = []
+        for i in range(n_games):
+            score = 0
+            done = False
+            state = self.env.reset()
+            self.noise.reset()
+
+            while not done:
+                action = self.choose_action(state)
+                state_, reward, done, info = self.env.step(action)
+                score += reward
+                self.env.render()
+
+                self.store_transition(state=state, action=action, next_state=state_, reward=reward, done=done)
+                self.learn()
+                state = state_
+
+            # agent.learn()
+            scores.append(score)
+            avg_score = np.mean(scores[-100:])
+            print('episode', i, 'score %.1f' % score, 'average score %.2f' % avg_score)
+
+        self.env.close()
         
 
 

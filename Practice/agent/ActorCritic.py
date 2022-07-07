@@ -7,10 +7,11 @@ from networks.ac_net import ActorCriticNetwork
 
 # Without Baseline
 class SimpleAgent():
-    def __init__(self, n_inputs, n_actions, lr = 5e-6, gamma = 0.99) -> None:
+    def __init__(self, n_inputs, n_actions, env, lr = 5e-6, gamma = 0.99) -> None:
         self.gamma = gamma
         self.log_pi = None
         self.actor_critic = ActorCriticNetwork(n_inputs=n_inputs, n_actions=n_actions, lr=lr)
+        self.env = env
 
     def choose_action(self, state):
         state = T.tensor(np.array([state]))
@@ -40,6 +41,30 @@ class SimpleAgent():
         
         (actor_loss + critic_loss).backward()
         self.actor_critic.optimizer.step()
+
+    def run(self, n_games):
+        scores = []
+        for i in range(n_games):
+            score = 0
+            state = self.env.reset()
+            done = False
+            # agent.reset()
+            while not done:
+                # action = agent.choose_action(state)
+                action = self.choose_action(state)
+                state_, reward, done, info = self.env.step(action)
+                score += reward
+                self.env.render()
+                # agent.store(state=state, next_state=state_, reward=reward, done=done)
+                self.learn(state=state, reward=reward, next_state=state_, done=done)
+                state = state_
+
+            # agent.learn()
+            scores.append(score)
+            avg_score = np.mean(scores[-100:])
+            print('episode', i, 'score %.1f' % score, 'average score %.2f' % avg_score)
+
+        self.env.close()
 
 # With Baseline Deduction
 class Agent():

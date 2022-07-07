@@ -5,9 +5,10 @@ import numpy as np
 from networks.basic import PolicyNetWork
 
 class Agent():
-    def __init__(self, n_inputs, n_actions, gamma=0.99, lr = 0.001) -> None:
+    def __init__(self, env, n_inputs, n_actions, gamma=0.99, lr = 0.001) -> None:
         self.gamma = gamma
         self.lr = lr
+        self.env = env
 
         self.reward_memory = []
         self.action_memory = []
@@ -47,5 +48,26 @@ class Agent():
 
         self.action_memory = []
         self.reward_memory = []
+
+    def run(self, n_games):
+        scores = []
+        for i in range(n_games):
+            score = 0
+            state = self.env.reset()
+            done = False
+            while not done:
+                action = self.choose_action(state)
+                state_, reward, done, info = self.env.step(action)
+                score += reward
+                self.env.render()
+                self.store(reward=reward)
+                state = state_
+
+            self.learn()
+            scores.append(score)
+            avg_score = np.mean(scores[-100:])
+            print('episode', i, 'score %.1f' % score, 'average score %.2f' % avg_score)
+
+        self.env.close()
 
     
