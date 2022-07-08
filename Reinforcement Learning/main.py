@@ -24,8 +24,8 @@ agent = REINFORCE.Agent(env=env, n_actions=env.action_space.n, n_inputs=[env.obs
 
 ## DDPG
 ddpg_agent = DDPG.Agent(env=env_continuous, n_inputs=env_continuous.observation_space.shape, n_actions=env_continuous.action_space.shape[0])
-# ddpg_agent.run(n_games=n_games)
+ddpg_agent.run(n_games=n_games)
 
 ## PPO
-ppo_agent = PPO.Agent(env=env, n_actions=env.action_space.n, n_inputs=[env.observation_space.shape[0]])
-ppo_agent.run(n_games=300)
+# ppo_agent = PPO.Agent(env=env, n_actions=env.action_space.n, n_inputs=[env.observation_space.shape[0]])
+# ppo_agent.run(n_games=300)
