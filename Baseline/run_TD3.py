@@ -1,4 +1,5 @@
 import gym, os
+from loguru import logger
 import numpy as np
 
 from stable_baselines3 import TD3
@@ -11,11 +12,18 @@ from stable_baselines3.common.results_plotter import plot_results
 from stable_baselines3.common.vec_env import DummyVecEnv
 from utils.callbacks import SaveOnBestTrainingRewardCallback
 from utils import tools
+from loguru import logger
+# import mujoco_py
+import torch
+# mj_path = mujoco_py.utils.discover_mujoco()
 
-load_model = False
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
+load_model = True
 train = True
 # tools.set_logger_level(1)
-env_id = 'LunarLanderContinuous-v2'
+env_id = tools.get_environments(1)
+logger.critical('train {} env'.format(env_id))
 # Create log dir
 log_dir = "tmp/td3/" + env_id
 result_dir = "results/td3/{}/".format(env_id)
@@ -40,7 +48,7 @@ if train:
     # Create the callback: check every 1000 steps
     callback = SaveOnBestTrainingRewardCallback(check_freq=1000, log_dir=log_dir)
     # Train the agent
-    timesteps = 1e5
+    timesteps = 3e5
 
     model.learn(total_timesteps=int(timesteps), callback=callback)
 

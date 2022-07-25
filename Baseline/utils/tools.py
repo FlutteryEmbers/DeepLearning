@@ -54,7 +54,7 @@ def mkdir(dir):
         os.makedirs(dir)
 
 def get_environments(choice):
-    env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v4', 'Hopper-v2']
+    env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v2', 'Hopper-v2']
     logger.critical('Trainning: {}'.format(env_list[choice]))
     return env_list[choice]
 
