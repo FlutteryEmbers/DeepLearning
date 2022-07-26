@@ -58,17 +58,17 @@ def get_environments(choice):
     logger.critical('Trainning: {}'.format(env_list[choice]))
     return env_list[choice]
 
-def save_video(env_id, model, video_folder, video_length=10000):
+def save_video(env_id, model, model_name, video_folder, video_length=10000):
     logger.warning('Making Video for {}'.format(env_id))
     env = DummyVecEnv([lambda: gym.make(env_id)])
-    if video_length == None:
-        video_length = render_once(env, model)
+    # if video_length == None:
+    #     video_length = render_once(env, model)
 
     obs = env.reset()
     # Record the video starting at the first step
     env = VecVideoRecorder(env, video_folder,
                         record_video_trigger=lambda x: x == 0, video_length=video_length,
-                        name_prefix=env_id)
+                        name_prefix=model_name)
 
     env.reset()
     for i in tqdm(range(video_length), desc="Video Frame Used"):
@@ -81,15 +81,6 @@ def save_video(env_id, model, video_folder, video_length=10000):
     env.close()
     logger.success('Video Saved')
 
-
-def render_once(env, model):
-    obs = env.reset()
-    done = False
-    n_steps = 0
-    while not done:
-        n_steps += 1
-        action, _state = model.predict(obs, deterministic=True)
-        # action = [env.action_space.sample()]
-        obs, reward, done, info = env.step(action)
-    return n_steps
-
+def display_torch_device():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
