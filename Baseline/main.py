@@ -49,7 +49,7 @@ if __name__ == '__main__':
     # tools.set_logger_level(1)
     for i in range(1, len(env_list)):
         process_monitor = monitor.Process_Monitor()
-        env_id = tools.get_environments(i)
+        env_id = get_environments(i)
         logger.warning('train {} env'.format(env_id))
         env = gym.make(env_id)
 
