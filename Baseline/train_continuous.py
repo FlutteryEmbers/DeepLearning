@@ -18,6 +18,7 @@ reward_decay = True
 
 learners = ['SAC', 'PPO', 'TD3', 'TRPO']
 env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v2', 'Hopper-v2']
+max_train_steps = 300
 # reward_threshold = []
 
 def get_environments(choice):
@@ -68,7 +69,6 @@ if __name__ == '__main__':
                 logger.success('loading model with rewards {}'.format(reward))
 
             train_steps = 0
-            max_train_steps = 200
             best_reward = float('-inf')
             process_monitor = monitor.Process_Monitor()
 
