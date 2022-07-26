@@ -136,3 +136,5 @@ dmypy.json
 *minist/
 tmp/
 *tmp/
+results/
+*results/
