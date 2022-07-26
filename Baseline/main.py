@@ -44,10 +44,11 @@ def create_savings(env_id, learner_name):
     return log_dir, result_dir
 
 if __name__ == '__main__':
+    tools.display_torch_device()
     load_model = False
     train = True
     # tools.set_logger_level(1)
-    for i in range(1, len(env_list)):
+    for i in range(len(env_list)):
         process_monitor = monitor.Process_Monitor()
         env_id = get_environments(i)
         logger.warning('train {} env'.format(env_id))
@@ -63,8 +64,11 @@ if __name__ == '__main__':
                 model = model.load(os.path.join(log_dir, '{}.zip'.format(learner_name)))
 
             train_steps = 0
-            while train and train_steps < 3:
+            max_train_steps = 200
+            best_reward = float('-inf')
+            while train and train_steps < max_train_steps:
                 train_steps += 1
+                logger.success('train {} {} times - left {} steps'.format(learner_name, train_steps, max_train_steps-train_steps))
                 model.learn(total_timesteps=1000)
                 _, reward = monitor.evaluate_policy(env=env, model=model)
                 process_monitor.store(reward=reward)
@@ -73,11 +77,17 @@ if __name__ == '__main__':
                 if average_reward > reward_threshold:
                     tools.save_video(env_id, model, result_dir)
                 '''
+                if reward > best_reward:
+                    best_reward = reward
+                    model.save(os.path.join(log_dir, '{}_best.zip'.format(learner_name)))
+                    logger.success('update best model')
+
+                if train_steps % 10 == 0:
+                    model.save(os.path.join(log_dir, '{}_tmp.zip'.format(learner_name)))
             
             if train:
-                model.save(os.path.join(log_dir, '{}.zip'.format(learner_name)))
                 process_monitor.plot_learning_curve('{}/{}'.format(result_dir, learner_name))
                 process_monitor.plot_average_learning_curve('{}/{}'.format(result_dir, learner_name), 50)
 
-            tools.save_video(env_id, model, learner_name, result_dir) 
+            # tools.save_video(env_id, model, learner_name, result_dir) 
             
