@@ -45,10 +45,10 @@ def create_savings(env_id, learner_name):
 
 if __name__ == '__main__':
     tools.display_torch_device()
-    load_model = False
-    train = True
+    load_model = True
+    train = False
     # tools.set_logger_level(1)
-    for i in range(len(env_list)):
+    for i in range(1, len(env_list)):
         process_monitor = monitor.Process_Monitor()
         env_id = get_environments(i)
         logger.warning('train {} env'.format(env_id))
@@ -61,7 +61,7 @@ if __name__ == '__main__':
             logger.warning('using {} model'.format(learner_name))
 
             if load_model:
-                model = model.load(os.path.join(log_dir, '{}.zip'.format(learner_name)))
+                model = model.load(os.path.join(log_dir, '{}_best.zip'.format(learner_name)))
 
             train_steps = 0
             max_train_steps = 200
@@ -89,5 +89,5 @@ if __name__ == '__main__':
                 process_monitor.plot_learning_curve('{}/{}'.format(result_dir, learner_name))
                 process_monitor.plot_average_learning_curve('{}/{}'.format(result_dir, learner_name), 50)
 
-            # tools.save_video(env_id, model, learner_name, result_dir) 
+            tools.save_video(env_id, model, learner_name, result_dir) 
             
