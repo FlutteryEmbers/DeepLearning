@@ -52,7 +52,7 @@ if __name__ == '__main__':
     # tools.set_logger_level(1)
     for i in range(1, len(env_list)):
         env_id = get_environments(i)
-        logger.warning('train {} env'.format(env_id))
+        logger.warning('env {}'.format(env_id))
         env = gym.make(env_id)
 
         for learner_index in range(len(learners)):
@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
             while train and train_steps < max_train_steps:
                 train_steps += 1
-                logger.success('train {} {} times - left {} steps'.format(learner_name, train_steps, max_train_steps-train_steps))
+                logger.success('trained in {} using {} {} times - left {} steps'.format(env_id, learner_name, train_steps, max_train_steps-train_steps))
                 model.learn(total_timesteps=1000)
                 _, reward = monitor.evaluate_policy(env=env, model=model)
                 process_monitor.store(reward=reward)
