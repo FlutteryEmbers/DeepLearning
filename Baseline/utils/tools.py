@@ -53,11 +53,6 @@ def mkdir(dir):
     if not isExist:
         os.makedirs(dir)
 
-def get_environments(choice):
-    env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v2', 'Hopper-v2']
-    logger.critical('Trainning: {}'.format(env_list[choice]))
-    return env_list[choice]
-
 def save_video(env_id, model, model_name, video_folder, video_length=10000):
     logger.warning('Making Video for {}'.format(env_id))
     env = DummyVecEnv([lambda: gym.make(env_id)])

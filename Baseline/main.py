@@ -13,7 +13,12 @@ from loguru import logger
 # mj_path = mujoco_py.utils.discover_mujoco()
 
 learners = ['SAC', 'PPO', 'TD3', 'TRPO']
+env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v2', 'Hopper-v2']
 # reward_threshold = []
+
+def get_environments(choice):
+    logger.critical('Trainning: {}'.format(env_list[choice]))
+    return env_list[choice]
 
 def get_model(index, env):
     if  index == 0:
@@ -42,7 +47,7 @@ if __name__ == '__main__':
     load_model = False
     train = True
     # tools.set_logger_level(1)
-    for i in range(1):
+    for i in range(1, len(env_list)):
         process_monitor = monitor.Process_Monitor()
         env_id = tools.get_environments(i)
         logger.warning('train {} env'.format(env_id))
@@ -68,8 +73,11 @@ if __name__ == '__main__':
                 if average_reward > reward_threshold:
                     tools.save_video(env_id, model, result_dir)
                 '''
-            model.save(os.path.join(log_dir, '{}.zip'.format(learner_name)))
-            process_monitor.plot_learning_curve('{}/{}'.format(result_dir, learner_name))
-            process_monitor.plot_average_learning_curve('{}/{}'.format(result_dir, learner_name), 50)
+            
+            if train:
+                model.save(os.path.join(log_dir, '{}.zip'.format(learner_name)))
+                process_monitor.plot_learning_curve('{}/{}'.format(result_dir, learner_name))
+                process_monitor.plot_average_learning_curve('{}/{}'.format(result_dir, learner_name), 50)
+
             tools.save_video(env_id, model, learner_name, result_dir) 
             
