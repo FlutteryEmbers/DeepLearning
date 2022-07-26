@@ -62,6 +62,8 @@ if __name__ == '__main__':
 
             if load_model:
                 model = model.load(os.path.join(log_dir, '{}_best.zip'.format(learner_name)))
+                _, reward = monitor.evaluate_policy(env=env, model=model)
+                logger.success('loading model with rewards {}'.format(reward))
 
             train_steps = 0
             max_train_steps = 200
