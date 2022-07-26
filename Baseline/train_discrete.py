@@ -18,7 +18,7 @@ reward_decay = True
 
 learners = ['DQN', 'PPO', 'TRPO']
 env_list = ["LunarLander-v2"]
-max_train_steps = 3
+max_train_steps = 300
 # reward_threshold = []
 
 def get_environments(choice):
