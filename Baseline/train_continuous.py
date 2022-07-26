@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
             train_steps = 0
             best_reward = float('-inf')
-            process_monitor = monitor.Process_Monitor()
+            process_monitor = monitor.Process_Monitor(output_dir=result_dir, name=learner_name)
 
             while train and train_steps < max_train_steps:
                 train_steps += 1
@@ -92,8 +92,8 @@ if __name__ == '__main__':
                     model.save(os.path.join(log_dir, '{}_tmp.zip'.format(learner_name)))
             
             if train:
-                process_monitor.plot_learning_curve('{}/{}'.format(result_dir, learner_name))
-                process_monitor.plot_average_learning_curve('{}/{}'.format(result_dir, learner_name), 50)
+                process_monitor.plot_learning_curve()
+                process_monitor.plot_average_learning_curve(50)
                 process_monitor.reset()
 
             tools.save_video(env_id, model, learner_name, result_dir) 
