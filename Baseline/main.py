@@ -12,6 +12,10 @@ from loguru import logger
 # import mujoco_py
 # mj_path = mujoco_py.utils.discover_mujoco()
 
+load_model = False
+train = True
+reward_decay = True
+
 learners = ['SAC', 'PPO', 'TD3', 'TRPO']
 env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v2', 'Hopper-v2']
 # reward_threshold = []
@@ -45,16 +49,14 @@ def create_savings(env_id, learner_name):
 
 if __name__ == '__main__':
     tools.display_torch_device()
-    load_model = True
-    train = False
     # tools.set_logger_level(1)
     for i in range(1, len(env_list)):
-        process_monitor = monitor.Process_Monitor()
         env_id = get_environments(i)
         logger.warning('train {} env'.format(env_id))
         env = gym.make(env_id)
 
         for learner_index in range(len(learners)):
+            model = None
             learner_name, model = get_model(index=learner_index, env=env)
             log_dir, result_dir = create_savings(env_id=env_id, learner_name=learner_name)
 
@@ -68,6 +70,8 @@ if __name__ == '__main__':
             train_steps = 0
             max_train_steps = 200
             best_reward = float('-inf')
+            process_monitor = monitor.Process_Monitor()
+
             while train and train_steps < max_train_steps:
                 train_steps += 1
                 logger.success('train {} {} times - left {} steps'.format(learner_name, train_steps, max_train_steps-train_steps))
@@ -90,6 +94,7 @@ if __name__ == '__main__':
             if train:
                 process_monitor.plot_learning_curve('{}/{}'.format(result_dir, learner_name))
                 process_monitor.plot_average_learning_curve('{}/{}'.format(result_dir, learner_name), 50)
+                process_monitor.reset()
 
             tools.save_video(env_id, model, learner_name, result_dir) 
             
