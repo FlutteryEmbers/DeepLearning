@@ -18,7 +18,7 @@ reward_decay = True
 
 learners = ['SAC', 'PPO', 'TD3', 'TRPO']
 env_list = ["LunarLanderContinuous-v2", 'HalfCheetah-v2', 'Hopper-v2']
-max_train_steps = 300
+max_train_steps = 250
 # reward_threshold = []
 
 def get_environments(choice):
@@ -55,6 +55,7 @@ if __name__ == '__main__':
         env_id = get_environments(i)
         logger.warning('env {}'.format(env_id))
         env = gym.make(env_id)
+        env.seed(10)
 
         for learner_index in range(len(learners)):
             model = None
@@ -94,6 +95,7 @@ if __name__ == '__main__':
             if train:
                 process_monitor.plot_learning_curve()
                 process_monitor.plot_average_learning_curve(50)
+                process_monitor.dump_to_file()
                 process_monitor.reset()
 
             tools.save_video(env_id, model, learner_name, result_dir) 
