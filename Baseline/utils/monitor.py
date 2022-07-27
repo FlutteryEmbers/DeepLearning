@@ -7,20 +7,6 @@ from loguru import logger
 import matplotlib.pyplot as plt
 import pickle
 
-def evaluate_policy(env, model):
-	obs = env.reset()
-	done = False
-	total_rewards = 0
-	n_steps = 0
-	while not done:
-		n_steps += 1
-		action, _state = model.predict(obs, deterministic=True)
-        # action = [env.action_space.sample()]
-		obs, reward, done, info = env.step(action)
-		total_rewards += reward
-
-	return n_steps, total_rewards
-
 class Process_Monitor():
 	def __init__(self, output_dir='', name='') -> None:
 		self.rewards = []

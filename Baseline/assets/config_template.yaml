@@ -1,0 +1,5 @@
+load_model: False
+train: True
+mode: 'discrete'
+max_train_steps: 250
+reward_decay: True
