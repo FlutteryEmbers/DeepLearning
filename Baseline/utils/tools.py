@@ -89,7 +89,7 @@ class Trainer():
 
     def load_model(self, filename):
         self.model = self.model.load(filename)
-        _, reward = self.monitor.evaluate_policy(env=self.env, model=self.model)
+        reward = self.evaluate_policy()
         logger.success('loading model with rewards {}'.format(reward))
 
     def train(self, n_steps=1000):

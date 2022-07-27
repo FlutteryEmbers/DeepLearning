@@ -91,10 +91,11 @@ if __name__ == '__main__':
                 if trainer.steps % 10 == 0:
                     filename = os.path.join(log_dir, '{}_tmp.zip'.format(learner_name))
                     trainer.save_model(filename)
-            
+
             if train:
                 trainer.save_history()
-
+                
+            best_reward = float('-inf')
             # tools.save_video(env_id, model, learner_name, result_dir)
             trainer.save_video(video_folder=result_dir, name_prefix=learner_name)
             
