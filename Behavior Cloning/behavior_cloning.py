@@ -5,11 +5,12 @@ import torch.optim as optim
 import numpy as np
 
 import gym
+from gym.wrappers import Monitor
 from stable_baselines3 import PPO
 
-BUFFER_SIZE = 50000
-BATCH_SIZE = 64
-NUM_EPOCH = 1000000
+BUFFER_SIZE = 10000
+BATCH_SIZE = 128
+NUM_EPOCH = 100000
 
 class Actor(nn.Module):
     def __init__(self, n_inputs, n_actions) -> None:
@@ -25,8 +26,7 @@ class Actor(nn.Module):
         state = torch.tensor(state, dtype=torch.float32).to(self.device)
         state = F.relu(self.fc1(state))
         state = F.relu(self.fc2(state))
-        action = F.relu(self.out(state))
-        return action
+        return self.out(state)
 
 class Replay_Buffer():
     def __init__(self, buffer_size, n_inputs, n_actions) -> None:
@@ -47,8 +47,9 @@ class Replay_Buffer():
         return self.state_memory[batch], self.action_memory[batch]
 
 env = gym.make("HalfCheetah-v2")
+video_env =  Monitor(gym.make("HalfCheetah-v2"), './video', force=True)
 expert_model = PPO("MlpPolicy", env, verbose=0)
-expert_model = expert_model.load('assets/experts/ppo_best.zip')
+expert_model = expert_model.load('assets/experts/ppo_tmp.zip')
 
 actor = Actor(n_inputs=env.observation_space.shape[0], n_actions=env.action_space.shape[0])
 db = Replay_Buffer(buffer_size=BUFFER_SIZE, n_inputs=env.observation_space.shape[0], n_actions=env.action_space.shape[0])
@@ -64,6 +65,13 @@ while db.counter <= BUFFER_SIZE:
         obs, reward, done, info = env.step(action)
         total_rewards += reward
 
+obs = video_env.reset()
+done = False
+total_rewards = 0
+while not done:
+    action, _state = expert_model.predict(obs, deterministic=True)
+    obs, reward, done, info = video_env.step(action)
+    total_rewards += reward
 print(total_rewards)
 
 print('Start Trainning')
@@ -92,3 +100,11 @@ for i in range(NUM_EPOCH):
         print(total_reward, running_loss/1000)
         running_loss = 0.0
 
+obs = video_env.reset()
+done = False
+total_rewards = 0
+while not done:
+    action = actor(obs).cpu().detach().numpy()
+    obs, reward, done, info = video_env.step(action)
+    total_rewards += reward
+print(total_rewards)

@@ -8,7 +8,7 @@ from utils import tools, monitor
 env = gym.make("HalfCheetah-v2")
 model = PPO("MlpPolicy", env, verbose=0)
 
-max_train_steps = 100
+max_train_steps = 100000
 best_reward = float('-inf')
 process_monitor = monitor.Process_Monitor(output_dir="assets/experts", name='ppo')
 trainer = tools.Trainer(env, model, process_monitor)
