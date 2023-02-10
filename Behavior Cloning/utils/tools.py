@@ -4,6 +4,7 @@ from loguru import logger
 import gym
 from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 
 def setup_seed(seed):
     torch.manual_seed(seed)
@@ -83,9 +84,12 @@ def display_torch_device():
 class Trainer():
     def __init__(self, env, model, monitor) -> None:
         self.env = env
+        # self.env_id = env.unwrapped.spec.id
         self.model = model
         self.monitor = monitor
         self.steps = 0
+        self.writter = SummaryWriter()
+        self.best_reward = float('-inf')
 
     def load_model(self, filename):
         self.model = self.model.load(filename)
@@ -93,34 +97,42 @@ class Trainer():
         logger.success('loading model with rewards {}'.format(reward))
 
     def train(self, n_steps=1000):
-        self.steps += 1
         self.model.learn(total_timesteps=n_steps)
+        self.steps += n_steps
         reward = self.evaluate_policy()
         self.monitor.store(reward=reward)
         average_reward = self.monitor.average(50)
+        if reward > self.best_reward:
+            self.best_reward = reward
+        self.writter.add_scalar('SB_train/average_rewards', average_reward, self.steps)
+        self.writter.add_scalar('SB_train/rewards', reward, self.steps)
+        self.writter.add_scalar('SB_train/max_rewards', self.best_reward, self.steps)
+        #self.writter.flush()
         return reward
 
     def save_model(self, filename):
         self.model.save(filename)
         logger.success('{} has been saved'.format(filename))
 
-    def evaluate_policy(self):
-        obs = self.env.reset()
-        done = False
+    def evaluate_policy(self, num_eval=10):
         total_rewards = 0
-        while not done:
-            action, _state = self.model.predict(obs, deterministic=True)
-            # action = [env.action_space.sample()]
-            obs, reward, done, info = self.env.step(action)
-            total_rewards += reward
+        for i in range(num_eval):
+            self.env.seed(np.random.randint(100000))
+            obs = self.env.reset()
+            done = False
+            while not done:
+                action, _state = self.model.predict(obs, deterministic=True)
+                obs, reward, done, info = self.env.step(action)
+                total_rewards += reward
 
-        return total_rewards
+        return total_rewards/num_eval
 
     def save_history(self):
         self.monitor.plot_learning_curve()
         self.monitor.plot_average_learning_curve(50)
         self.monitor.dump_to_file()
         self.monitor.reset()
+        self.writter.flush()
 
     def save_video(self, video_folder, name_prefix='', video_length=10000):
         logger.warning('Making Video')
@@ -143,6 +155,7 @@ class Trainer():
 
     def reset(self):
         self.steps = 0
+        self.best_reward = float('-inf')
         self.monitor.reset()
         self.env.reset()
         
